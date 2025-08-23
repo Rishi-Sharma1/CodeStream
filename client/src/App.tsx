@@ -8,6 +8,7 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { useAuthInit } from "./hooks/useAuthInit";
 import Home from "@/pages/Home";
 import Landing from "@/pages/Landing";
+import Profile from "@/pages/Profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +32,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/profile" component={Profile} />
       <Route path="/room/:roomId" component={Home} />
       <Route component={NotFound} />
     </Switch>

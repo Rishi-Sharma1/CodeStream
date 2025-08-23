@@ -1,4 +1,5 @@
-import { Copy, UserPlus, LogOut, User } from 'lucide-react';
+import { Copy, UserPlus, LogOut, User, Settings } from 'lucide-react';
+import { Link } from 'wouter';
 import { useEditor } from '../context/EditorContext';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
@@ -135,15 +136,29 @@ export default function Header() {
         
         {/* User Menu */}
         <div className="flex items-center space-x-3">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-github-primary rounded-full flex items-center justify-center text-sm text-white">
-              {user?.username ? user.username.slice(0, 2).toUpperCase() : <User size={16} />}
+          <Link href="/profile">
+            <div className="flex items-center space-x-2 hover:bg-gray-700 rounded-md px-2 py-1 cursor-pointer transition-colors">
+              <div className="w-8 h-8 bg-github-primary rounded-full flex items-center justify-center text-sm text-white">
+                {user?.username ? user.username.slice(0, 2).toUpperCase() : <User size={16} />}
+              </div>
+              <div className="hidden md:block">
+                <p className="text-sm font-medium text-github-text">{user?.username}</p>
+                <p className="text-xs text-github-text-secondary">{user?.email}</p>
+              </div>
             </div>
-            <div className="hidden md:block">
-              <p className="text-sm font-medium text-github-text">{user?.username}</p>
-              <p className="text-xs text-github-text-secondary">{user?.email}</p>
-            </div>
-          </div>
+          </Link>
+          
+          <Link href="/profile">
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-github-surface hover:bg-gray-700 border-github-border text-github-text"
+              data-testid="button-profile"
+            >
+              <Settings size={14} className="mr-1" />
+              Profile
+            </Button>
+          </Link>
           
           <Button
             onClick={handleLogout}

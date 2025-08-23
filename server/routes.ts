@@ -6,6 +6,18 @@ import MemoryStore from "memorystore";
 import { storage } from "./storage";
 import { insertRoomSchema, insertFileSchema, insertChatMessageSchema, insertUserSchema, loginSchema } from "@shared/schema";
 
+// Extend session data interface
+declare module "express-session" {
+  interface SessionData {
+    userId?: string;
+    user?: {
+      id: string;
+      username: string;
+      email: string;
+    };
+  }
+}
+
 // Session middleware
 const MemoryStoreSession = MemoryStore(session);
 const sessionMiddleware = session({
