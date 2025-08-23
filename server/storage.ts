@@ -1,11 +1,14 @@
-import { type User, type InsertUser, type Room, type InsertRoom, type File, type InsertFile, type ChatMessage, type InsertChatMessage } from "@shared/schema";
+import { type User, type InsertUser, type LoginUser, type Room, type InsertRoom, type File, type InsertFile, type ChatMessage, type InsertChatMessage } from "@shared/schema";
 import { randomUUID } from "crypto";
+import bcrypt from "bcryptjs";
 
 export interface IStorage {
   // User methods
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  loginUser(credentials: LoginUser): Promise<User | null>;
   
   // Room methods
   getRoom(id: string): Promise<Room | undefined>;
@@ -48,10 +51,32 @@ export class MemStorage implements IStorage {
     );
   }
 
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email,
+    );
+  }
+
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = randomUUID();
-    const user: User = { ...insertUser, id };
+    const hashedPassword = await bcrypt.hash(insertUser.password, 10);
+    const user: User = { 
+      ...insertUser, 
+      id, 
+      password: hashedPassword,
+      createdAt: new Date()
+    };
     this.users.set(id, user);
+    return user;
+  }
+
+  async loginUser(credentials: LoginUser): Promise<User | null> {
+    const user = await this.getUserByEmail(credentials.email);
+    if (!user) return null;
+    
+    const isValid = await bcrypt.compare(credentials.password, user.password);
+    if (!isValid) return null;
+    
     return user;
   }
 
@@ -94,6 +119,7 @@ export class MemStorage implements IStorage {
     const file: File = { 
       ...insertFile, 
       id, 
+      content: insertFile.content || "",
       createdAt: now,
       updatedAt: now
     };

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useParams } from 'wouter';
 import { useEditor } from '../context/EditorContext';
+import { useAuth } from '../context/AuthContext';
 import { useWebSocket } from '../services/websocketService';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
@@ -13,6 +14,7 @@ import { fileService } from '../services/fileService';
 
 export default function Home() {
   const { roomId } = useParams();
+  const { user } = useAuth();
   const { 
     currentRoom, 
     setRoom, 
@@ -45,11 +47,11 @@ export default function Home() {
       };
     } else {
       // Generate new room
-      const newRoom = roomService.generateRoom();
+      const newRoom = roomService.generateRoom(user?.id);
       setRoom(newRoom);
       window.history.replaceState(null, '', `/room/${newRoom.id}`);
     }
-  }, [roomId, setRoom, setFiles, connect, disconnect]);
+  }, [roomId, setRoom, setFiles, connect, disconnect, user?.id]);
 
   useEffect(() => {
     setConnectionStatus(isConnected ? 'connected' : 'disconnected');

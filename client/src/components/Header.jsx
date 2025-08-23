@@ -1,10 +1,13 @@
-import { Copy, UserPlus, LogOut } from 'lucide-react';
+import { Copy, UserPlus, LogOut, User } from 'lucide-react';
 import { useEditor } from '../context/EditorContext';
+import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/authService';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Header() {
   const { currentRoom, users, connectionStatus } = useEditor();
+  const { user, clearUser } = useAuth();
   const { toast } = useToast();
 
   const copyRoomId = async () => {
@@ -28,6 +31,23 @@ export default function Header() {
       title: "Invite link ready!",
       description: `Share this URL: ${window.location.origin}/room/${currentRoom?.id}`,
     });
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      clearUser();
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to logout",
+        variant: "destructive",
+      });
+    }
   };
 
   const leaveRoom = () => {
@@ -97,15 +117,43 @@ export default function Header() {
             <UserPlus size={14} className="mr-1" />
             Invite
           </Button>
+          {currentRoom && (
+            <Button
+              onClick={leaveRoom}
+              variant="outline"
+              size="sm"
+              className="bg-github-surface hover:bg-gray-700 border-github-border text-github-text"
+              data-testid="button-leave"
+            >
+              <LogOut size={14} className="mr-1" />
+              Leave Room
+            </Button>
+          )}
+        </div>
+        
+        <div className="h-6 w-px bg-github-border"></div>
+        
+        {/* User Menu */}
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-github-primary rounded-full flex items-center justify-center text-sm text-white">
+              {user?.username ? user.username.slice(0, 2).toUpperCase() : <User size={16} />}
+            </div>
+            <div className="hidden md:block">
+              <p className="text-sm font-medium text-github-text">{user?.username}</p>
+              <p className="text-xs text-github-text-secondary">{user?.email}</p>
+            </div>
+          </div>
+          
           <Button
-            onClick={leaveRoom}
+            onClick={handleLogout}
             variant="outline"
             size="sm"
             className="bg-github-surface hover:bg-gray-700 border-github-border text-github-text"
-            data-testid="button-leave"
+            data-testid="button-logout"
           >
             <LogOut size={14} className="mr-1" />
-            Leave Room
+            Logout
           </Button>
         </div>
         

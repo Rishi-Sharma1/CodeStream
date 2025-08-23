@@ -1,12 +1,12 @@
 import { apiRequest } from '../lib/queryClient';
 
 export const roomService = {
-  generateRoom() {
+  generateRoom(userId) {
     const id = Math.random().toString(36).substring(2, 9);
     return {
       id,
       name: `Room ${id}`,
-      createdBy: 'user',
+      createdBy: userId || 'anonymous',
       createdAt: new Date(),
     };
   },
