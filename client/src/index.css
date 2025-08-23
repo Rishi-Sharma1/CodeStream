@@ -1,0 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(215, 27.91%, 6.86%);
+  --foreground: hsl(210, 11.11%, 92.94%);
+  --card: hsl(215, 25.53%, 8.63%);
+  --card-foreground: hsl(210, 11.11%, 92.94%);
+  --popover: hsl(215, 27.91%, 6.86%);
+  --popover-foreground: hsl(210, 11.11%, 92.94%);
+  --primary: hsl(211.76, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(210, 25%, 7.84%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 9.52%, 15.29%);
+  --muted-foreground: hsl(215, 16.36%, 46.67%);
+  --accent: hsl(210, 9.52%, 15.29%);
+  --accent-foreground: hsl(210, 11.11%, 92.94%);
+  --destructive: hsl(4.35, 89.81%, 58.43%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 18.18%, 12.75%);
+  --input: hsl(215, 25.53%, 8.63%);
+  --ring: hsl(211.76, 100%, 50%);
+  --github-bg: hsl(215, 27.91%, 6.86%);
+  --github-surface: hsl(215, 25.53%, 8.63%);
+  --github-border: hsl(210, 18.18%, 12.75%);
+  --github-text: hsl(210, 11.11%, 92.94%);
+  --github-text-secondary: hsl(215, 16.36%, 46.67%);
+  --github-primary: hsl(211.76, 100%, 50%);
+  --github-success: hsl(120, 100%, 25.49%);
+  --github-warning: hsl(45, 100%, 51.37%);
+  --github-danger: hsl(4.35, 89.81%, 58.43%);
+  --github-accent: hsl(0, 0%, 64.71%);
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Monaco', 'Consolas', monospace;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(215, 27.91%, 6.86%);
+  --foreground: hsl(210, 11.11%, 92.94%);
+  --card: hsl(215, 25.53%, 8.63%);
+  --card-foreground: hsl(210, 11.11%, 92.94%);
+  --popover: hsl(215, 27.91%, 6.86%);
+  --popover-foreground: hsl(210, 11.11%, 92.94%);
+  --primary: hsl(211.76, 100%, 50%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(210, 25%, 7.84%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --muted: hsl(210, 9.52%, 15.29%);
+  --muted-foreground: hsl(215, 16.36%, 46.67%);
+  --accent: hsl(210, 9.52%, 15.29%);
+  --accent-foreground: hsl(210, 11.11%, 92.94%);
+  --destructive: hsl(4.35, 89.81%, 58.43%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --border: hsl(210, 18.18%, 12.75%);
+  --input: hsl(215, 25.53%, 8.63%);
+  --ring: hsl(211.76, 100%, 50%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-github-bg text-github-text font-sans antialiased;
+    font-family: var(--font-sans);
+  }
+}
+
+.github-bg { background-color: var(--github-bg); }
+.github-surface { background-color: var(--github-surface); }
+.github-border { border-color: var(--github-border); }
+.github-text { color: var(--github-text); }
+.github-text-secondary { color: var(--github-text-secondary); }
+.github-primary { color: var(--github-primary); }
+.github-success { color: var(--github-success); }
+.github-warning { color: var(--github-warning); }
+.github-danger { color: var(--github-danger); }
+.github-accent { color: var(--github-accent); }
+
+.bg-github-bg { background-color: var(--github-bg); }
+.bg-github-surface { background-color: var(--github-surface); }
+.bg-github-primary { background-color: var(--github-primary); }
+.bg-github-success { background-color: var(--github-success); }
+.bg-github-warning { background-color: var(--github-warning); }
+.bg-github-danger { background-color: var(--github-danger); }
+
+.border-github-border { border-color: var(--github-border); }
+.text-github-text { color: var(--github-text); }
+.text-github-text-secondary { color: var(--github-text-secondary); }
+.text-github-primary { color: var(--github-primary); }
+.text-github-success { color: var(--github-success); }
+.text-github-warning { color: var(--github-warning); }
+.text-github-danger { color: var(--github-danger); }
+
+.font-mono { font-family: var(--font-mono); }
