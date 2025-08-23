@@ -17,7 +17,15 @@ export const authService = {
   },
 
   async getCurrentUser() {
-    const response = await apiRequest('GET', '/api/auth/me');
-    return response.json();
+    try {
+      const response = await apiRequest('GET', '/api/auth/me');
+      return response.json();
+    } catch (error) {
+      // If user is not authenticated, throw a more specific error
+      if (error.message?.includes('401')) {
+        throw new Error('Authentication required');
+      }
+      throw error;
+    }
   }
 };

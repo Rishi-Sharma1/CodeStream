@@ -2,12 +2,17 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import session from "express-session";
+import MemoryStore from "memorystore";
 import { storage } from "./storage";
 import { insertRoomSchema, insertFileSchema, insertChatMessageSchema, insertUserSchema, loginSchema } from "@shared/schema";
 
 // Session middleware
+const MemoryStoreSession = MemoryStore(session);
 const sessionMiddleware = session({
   secret: process.env.SESSION_SECRET || 'dev-secret-key',
+  store: new MemoryStoreSession({
+    checkPeriod: 86400000 // prune expired entries every 24h
+  }),
   resave: false,
   saveUninitialized: false,
   cookie: {

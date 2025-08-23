@@ -12,7 +12,13 @@ export function useAuthInit() {
         const { user } = await authService.getCurrentUser();
         setUser(user);
       } catch (error) {
-        clearUser();
+        // Ignore 401 errors - user is just not logged in
+        if (error.message?.includes('401') || error.message?.includes('Authentication required')) {
+          clearUser();
+        } else {
+          console.error('Auth initialization error:', error);
+          clearUser();
+        }
       } finally {
         setLoading(false);
       }
