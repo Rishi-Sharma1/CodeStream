@@ -1,0 +1,551 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CodeCollab - Real-time Collaborative Code Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'github-bg': '#0D1117',
+                        'github-surface': '#161B22',
+                        'github-border': '#21262D',
+                        'github-text': '#F0F6FC',
+                        'github-text-secondary': '#7D8590',
+                        'github-primary': '#0969DA',
+                        'github-success': '#238636',
+                        'github-warning': '#D29922',
+                        'github-danger': '#DA3633',
+                        'github-accent': '#A5A5A5'
+                    },
+                    fontFamily: {
+                        'mono': ['JetBrains Mono', 'Monaco', 'Consolas', 'monospace'],
+                        'sans': ['Inter', 'system-ui', 'sans-serif']
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-github-bg text-github-text font-sans h-screen overflow-hidden">
+
+    <!-- @COMPONENT: Header [contains logo, room info, user management] -->
+    <header class="bg-github-surface border-b border-github-border px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-code text-github-primary text-xl"></i>
+                <h1 class="text-xl font-semibold">CodeCollab</h1>
+            </div>
+            <div class="h-6 w-px bg-github-border"></div>
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-github-text-secondary">Room:</span>
+                <span class="bg-github-bg px-2 py-1 rounded text-sm font-mono" data-bind="currentRoom.id">abc-123-xyz</span>
+                <button class="text-github-text-secondary hover:text-github-text transition-colors p-1" data-event="click:copyRoomId" title="Copy room ID">
+                    <i class="fas fa-copy text-xs"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="flex items-center space-x-4">
+            <!-- @COMPONENT: UserList [shows active users in room] -->
+            <div class="flex items-center space-x-2">
+                <div class="flex -space-x-2">
+                    <div class="w-8 h-8 bg-github-primary rounded-full flex items-center justify-center text-sm border-2 border-github-surface" data-mock="true">
+                        JD
+                    </div>
+                    <div class="w-8 h-8 bg-github-success rounded-full flex items-center justify-center text-sm border-2 border-github-surface" data-mock="true">
+                        AS
+                    </div>
+                    <div class="w-8 h-8 bg-github-warning rounded-full flex items-center justify-center text-sm border-2 border-github-surface" data-mock="true">
+                        MK
+                    </div>
+                </div>
+                <span class="text-sm text-github-text-secondary">3 online</span>
+            </div>
+            
+            <div class="h-6 w-px bg-github-border"></div>
+            
+            <div class="flex items-center space-x-2">
+                <button class="bg-github-primary hover:bg-blue-600 px-3 py-1.5 rounded text-sm font-medium transition-colors" data-event="click:inviteUsers">
+                    <i class="fas fa-user-plus mr-1"></i>
+                    Invite
+                </button>
+                <button class="bg-github-surface hover:bg-gray-700 px-3 py-1.5 rounded text-sm font-medium transition-colors border border-github-border" data-event="click:leaveRoom">
+                    Leave Room
+                </button>
+            </div>
+        </div>
+    </header>
+    <!-- @END_COMPONENT: Header -->
+
+    <div class="flex h-[calc(100vh-60px)]">
+        
+        <!-- @COMPONENT: Sidebar [file explorer and room management] -->
+        <aside class="w-80 bg-github-surface border-r border-github-border flex flex-col">
+            <!-- File Explorer Tab -->
+            <div class="border-b border-github-border">
+                <div class="flex">
+                    <button class="flex-1 px-4 py-3 text-sm font-medium bg-github-bg border-r border-github-border text-github-text">
+                        <i class="fas fa-folder mr-2"></i>
+                        Files
+                    </button>
+                    <button class="flex-1 px-4 py-3 text-sm font-medium text-github-text-secondary hover:text-github-text hover:bg-github-bg transition-colors" data-event="click:switchToChat">
+                        <i class="fas fa-comments mr-2"></i>
+                        Chat
+                        <span class="ml-1 bg-github-danger text-white text-xs rounded-full px-1.5 py-0.5" data-mock="true">3</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- File Explorer Content -->
+            <div class="flex-1 overflow-y-auto p-3">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-github-text-secondary uppercase tracking-wide">Project Files</h3>
+                    <button class="text-github-text-secondary hover:text-github-text p-1" data-event="click:createNewFile" title="New file">
+                        <i class="fas fa-plus text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- @MAP: files.map(file => ( -->
+                <div class="space-y-1">
+                    <div class="flex items-center space-x-2 p-2 rounded hover:bg-github-bg cursor-pointer group transition-colors" data-event="click:openFile" data-file-id="1">
+                        <i class="fas fa-file-code text-github-primary text-sm"></i>
+                        <span class="text-sm flex-1" data-bind="file.name">index.js</span>
+                        <div class="opacity-0 group-hover:opacity-100 flex space-x-1">
+                            <button class="text-github-text-secondary hover:text-github-text p-1" data-event="click:downloadFile" title="Download">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button class="text-github-text-secondary hover:text-github-danger p-1" data-event="click:deleteFile" title="Delete">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-2 rounded hover:bg-github-bg cursor-pointer group transition-colors bg-github-bg" data-event="click:openFile" data-file-id="2">
+                        <i class="fas fa-file-code text-github-warning text-sm"></i>
+                        <span class="text-sm flex-1" data-bind="file.name">utils.js</span>
+                        <div class="opacity-0 group-hover:opacity-100 flex space-x-1">
+                            <button class="text-github-text-secondary hover:text-github-text p-1" data-event="click:downloadFile" title="Download">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button class="text-github-text-secondary hover:text-github-danger p-1" data-event="click:deleteFile" title="Delete">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-2 rounded hover:bg-github-bg cursor-pointer group transition-colors" data-event="click:openFile" data-file-id="3">
+                        <i class="fas fa-file-code text-github-success text-sm"></i>
+                        <span class="text-sm flex-1" data-bind="file.name">components.js</span>
+                        <div class="opacity-0 group-hover:opacity-100 flex space-x-1">
+                            <button class="text-github-text-secondary hover:text-github-text p-1" data-event="click:downloadFile" title="Download">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button class="text-github-text-secondary hover:text-github-danger p-1" data-event="click:deleteFile" title="Delete">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center space-x-2 p-2 rounded hover:bg-github-bg cursor-pointer group transition-colors" data-event="click:openFile" data-file-id="4">
+                        <i class="fab fa-css3 text-blue-400 text-sm"></i>
+                        <span class="text-sm flex-1" data-bind="file.name">styles.css</span>
+                        <div class="opacity-0 group-hover:opacity-100 flex space-x-1">
+                            <button class="text-github-text-secondary hover:text-github-text p-1" data-event="click:downloadFile" title="Download">
+                                <i class="fas fa-download text-xs"></i>
+                            </button>
+                            <button class="text-github-text-secondary hover:text-github-danger p-1" data-event="click:deleteFile" title="Delete">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+
+            <!-- Room Actions -->
+            <div class="p-3 border-t border-github-border space-y-2">
+                <button class="w-full bg-github-bg hover:bg-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors border border-github-border flex items-center justify-center" data-event="click:saveAllFiles">
+                    <i class="fas fa-save mr-2"></i>
+                    Save All Files
+                </button>
+                <button class="w-full bg-github-success hover:bg-green-700 px-3 py-2 rounded text-sm font-medium transition-colors flex items-center justify-center" data-event="click:downloadProject">
+                    <i class="fas fa-download mr-2"></i>
+                    Download Project
+                </button>
+            </div>
+        </aside>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainEditor [code editor with tabs] -->
+        <main class="flex-1 flex flex-col">
+            <!-- Editor Tabs -->
+            <div class="bg-github-surface border-b border-github-border flex items-center overflow-x-auto">
+                <div class="flex">
+                    <!-- @MAP: openFiles.map(file => ( -->
+                    <div class="flex items-center bg-github-bg border-r border-github-border px-4 py-2 min-w-max cursor-pointer group" data-file-id="2">
+                        <i class="fas fa-file-code text-github-warning text-sm mr-2"></i>
+                        <span class="text-sm" data-bind="file.name">utils.js</span>
+                        <button class="ml-2 text-github-text-secondary hover:text-github-text opacity-0 group-hover:opacity-100 transition-opacity" data-event="click:closeFile">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="flex items-center border-r border-github-border px-4 py-2 min-w-max cursor-pointer group text-github-text-secondary hover:bg-github-bg transition-colors" data-file-id="1">
+                        <i class="fas fa-file-code text-github-primary text-sm mr-2"></i>
+                        <span class="text-sm" data-bind="file.name">index.js</span>
+                        <button class="ml-2 text-github-text-secondary hover:text-github-text opacity-0 group-hover:opacity-100 transition-opacity" data-event="click:closeFile">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+                <button class="px-3 py-2 text-github-text-secondary hover:text-github-text hover:bg-github-bg transition-colors" data-event="click:openFileDialog" title="Open file">
+                    <i class="fas fa-plus text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Editor Toolbar -->
+            <div class="bg-github-surface border-b border-github-border px-4 py-2 flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2">
+                        <select class="bg-github-bg border border-github-border rounded px-2 py-1 text-sm text-github-text focus:outline-none focus:ring-2 focus:ring-github-primary" data-implementation="Language selector for syntax highlighting">
+                            <option>JavaScript</option>
+                            <option>TypeScript</option>
+                            <option>Python</option>
+                            <option>HTML</option>
+                            <option>CSS</option>
+                        </select>
+                    </div>
+                    <div class="h-4 w-px bg-github-border"></div>
+                    <div class="flex items-center space-x-2">
+                        <button class="p-1 text-github-text-secondary hover:text-github-text transition-colors" data-event="click:formatCode" title="Format code">
+                            <i class="fas fa-magic text-sm"></i>
+                        </button>
+                        <button class="p-1 text-github-text-secondary hover:text-github-text transition-colors" data-event="click:toggleWordWrap" title="Toggle word wrap">
+                            <i class="fas fa-align-left text-sm"></i>
+                        </button>
+                        <button class="p-1 text-github-text-secondary hover:text-github-text transition-colors" data-event="click:findReplace" title="Find & Replace">
+                            <i class="fas fa-search text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2 text-sm text-github-text-secondary">
+                    <span>Line 15, Column 8</span>
+                    <span>•</span>
+                    <span>UTF-8</span>
+                    <span>•</span>
+                    <span class="flex items-center">
+                        <i class="fas fa-wifi mr-1 text-github-success"></i>
+                        Connected
+                    </span>
+                </div>
+            </div>
+
+            <!-- Code Editor -->
+            <!-- @FUNCTIONALITY: This code editor should implement syntax highlighting, auto-suggestions, real-time collaboration -->
+            <div class="flex-1 relative">
+                <div class="absolute inset-0 bg-github-bg">
+                    <!-- Line Numbers -->
+                    <div class="flex h-full">
+                        <div class="w-12 bg-github-surface border-r border-github-border flex flex-col text-github-text-secondary text-sm font-mono">
+                            <div class="px-2 py-1 text-right">1</div>
+                            <div class="px-2 py-1 text-right">2</div>
+                            <div class="px-2 py-1 text-right">3</div>
+                            <div class="px-2 py-1 text-right">4</div>
+                            <div class="px-2 py-1 text-right">5</div>
+                            <div class="px-2 py-1 text-right">6</div>
+                            <div class="px-2 py-1 text-right">7</div>
+                            <div class="px-2 py-1 text-right">8</div>
+                            <div class="px-2 py-1 text-right">9</div>
+                            <div class="px-2 py-1 text-right">10</div>
+                            <div class="px-2 py-1 text-right">11</div>
+                            <div class="px-2 py-1 text-right">12</div>
+                            <div class="px-2 py-1 text-right">13</div>
+                            <div class="px-2 py-1 text-right">14</div>
+                            <div class="px-2 py-1 text-right bg-github-bg text-github-text">15</div>
+                            <div class="px-2 py-1 text-right">16</div>
+                            <div class="px-2 py-1 text-right">17</div>
+                            <div class="px-2 py-1 text-right">18</div>
+                            <div class="px-2 py-1 text-right">19</div>
+                            <div class="px-2 py-1 text-right">20</div>
+                        </div>
+                        
+                        <!-- Code Content -->
+                        <div class="flex-1 p-4 font-mono text-sm overflow-auto" data-mock="true">
+                            <div class="space-y-1">
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">express</span> <span class="text-white">=</span> <span class="text-green-400">require</span><span class="text-yellow-300">(</span><span class="text-green-300">'express'</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">http</span> <span class="text-white">=</span> <span class="text-green-400">require</span><span class="text-yellow-300">(</span><span class="text-green-300">'http'</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">socketIo</span> <span class="text-white">=</span> <span class="text-green-400">require</span><span class="text-yellow-300">(</span><span class="text-green-300">'socket.io'</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                                <div></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">app</span> <span class="text-white">=</span> <span class="text-green-400">express</span><span class="text-yellow-300">()</span><span class="text-white">;</span></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">server</span> <span class="text-white">=</span> <span class="text-blue-300">http</span><span class="text-white">.</span><span class="text-green-400">createServer</span><span class="text-yellow-300">(</span><span class="text-blue-300">app</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">io</span> <span class="text-white">=</span> <span class="text-green-400">socketIo</span><span class="text-yellow-300">(</span><span class="text-blue-300">server</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                                <div></div>
+                                <div><span class="text-gray-500">// Middleware</span></div>
+                                <div><span class="text-blue-300">app</span><span class="text-white">.</span><span class="text-green-400">use</span><span class="text-yellow-300">(</span><span class="text-blue-300">express</span><span class="text-white">.</span><span class="text-green-400">json</span><span class="text-yellow-300">())</span><span class="text-white">;</span></div>
+                                <div><span class="text-blue-300">app</span><span class="text-white">.</span><span class="text-green-400">use</span><span class="text-yellow-300">(</span><span class="text-blue-300">express</span><span class="text-white">.</span><span class="text-green-400">static</span><span class="text-yellow-300">(</span><span class="text-green-300">'public'</span><span class="text-yellow-300">))</span><span class="text-white">;</span></div>
+                                <div></div>
+                                <div><span class="text-gray-500">// Socket.IO connection handling</span></div>
+                                <div><span class="text-blue-300">io</span><span class="text-white">.</span><span class="text-green-400">on</span><span class="text-yellow-300">(</span><span class="text-green-300">'connection'</span><span class="text-white">,</span> <span class="text-yellow-300">(</span><span class="text-blue-300">socket</span><span class="text-yellow-300">) =></span> <span class="text-yellow-300">{</span></div>
+                                <div class="bg-github-surface bg-opacity-50 border-l-2 border-github-primary">  <span class="text-blue-300">console</span><span class="text-white">.</span><span class="text-green-400">log</span><span class="text-yellow-300">(</span><span class="text-green-300">'User connected:'</span><span class="text-white">,</span> <span class="text-blue-300">socket</span><span class="text-white">.</span><span class="text-blue-300">id</span><span class="text-yellow-300">)</span><span class="text-white">;</span><span class="bg-github-primary w-2 h-4 inline-block ml-2 animate-pulse"></span></div>
+                                <div><span class="text-yellow-300">}</span><span class="text-white">;</span></div>
+                                <div></div>
+                                <div><span class="text-purple-400">const</span> <span class="text-blue-300">PORT</span> <span class="text-white">=</span> <span class="text-blue-300">process</span><span class="text-white">.</span><span class="text-blue-300">env</span><span class="text-white">.</span><span class="text-blue-300">PORT</span> <span class="text-white">||</span> <span class="text-orange-400">3000</span><span class="text-white">;</span></div>
+                                <div><span class="text-blue-300">server</span><span class="text-white">.</span><span class="text-green-400">listen</span><span class="text-yellow-300">(</span><span class="text-blue-300">PORT</span><span class="text-white">,</span> <span class="text-yellow-300">() =></span> <span class="text-yellow-300">{</span></div>
+                                <div>  <span class="text-blue-300">console</span><span class="text-white">.</span><span class="text-green-400">log</span><span class="text-yellow-300">(</span><span class="text-green-300">`Server running on port </span><span class="text-white">${</span><span class="text-blue-300">PORT</span><span class="text-white">}</span><span class="text-green-300">`</span><span class="text-yellow-300">)</span><span class="text-white">;</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Collaboration Cursors -->
+                    <div class="absolute top-20 left-32 w-0.5 h-5 bg-github-success animate-pulse" data-mock="true" title="Alice - line 3"></div>
+                    <div class="absolute top-32 left-48 w-0.5 h-5 bg-github-warning animate-pulse" data-mock="true" title="Bob - line 5"></div>
+                </div>
+
+                <!-- Auto-suggestion Popup -->
+                <!-- @STATE: showSuggestions:boolean = false -->
+                <div class="absolute top-80 left-20 bg-github-surface border border-github-border rounded shadow-xl z-10 w-64" data-mock="true" data-implementation="Auto-suggestion component">
+                    <div class="p-2">
+                        <div class="text-xs text-github-text-secondary mb-2">Suggestions</div>
+                        <div class="space-y-1">
+                            <div class="flex items-center p-2 bg-github-primary rounded text-sm">
+                                <i class="fas fa-cube mr-2 text-xs"></i>
+                                <span class="flex-1">console.log()</span>
+                                <span class="text-xs text-github-text-secondary">method</span>
+                            </div>
+                            <div class="flex items-center p-2 hover:bg-github-bg rounded text-sm cursor-pointer">
+                                <i class="fas fa-cube mr-2 text-xs"></i>
+                                <span class="flex-1">console.error()</span>
+                                <span class="text-xs text-github-text-secondary">method</span>
+                            </div>
+                            <div class="flex items-center p-2 hover:bg-github-bg rounded text-sm cursor-pointer">
+                                <i class="fas fa-cube mr-2 text-xs"></i>
+                                <span class="flex-1">console.warn()</span>
+                                <span class="text-xs text-github-text-secondary">method</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- @END_COMPONENT: MainEditor -->
+
+        <!-- @COMPONENT: ChatPanel [group chat functionality] -->
+        <aside class="w-80 bg-github-surface border-l border-github-border flex flex-col hidden" id="chatPanel">
+            <div class="p-4 border-b border-github-border">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-semibold">Team Chat</h3>
+                    <button class="text-github-text-secondary hover:text-github-text" data-event="click:closeChatPanel">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-4">
+                <!-- @MAP: messages.map(message => ( -->
+                <div class="flex items-start space-x-3" data-mock="true">
+                    <div class="w-8 h-8 bg-github-primary rounded-full flex items-center justify-center text-sm flex-shrink-0">
+                        JD
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium" data-bind="message.user">John Doe</span>
+                            <span class="text-xs text-github-text-secondary" data-bind="message.timestamp">2:34 PM</span>
+                        </div>
+                        <p class="text-sm text-github-text-secondary mt-1" data-bind="message.content">Working on the authentication module. Will push the changes soon!</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3" data-mock="true">
+                    <div class="w-8 h-8 bg-github-success rounded-full flex items-center justify-center text-sm flex-shrink-0">
+                        AS
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium" data-bind="message.user">Alice Smith</span>
+                            <span class="text-xs text-github-text-secondary" data-bind="message.timestamp">2:36 PM</span>
+                        </div>
+                        <p class="text-sm text-github-text-secondary mt-1" data-bind="message.content">Perfect! I'm reviewing the UI components. Looking good so far 👍</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start space-x-3" data-mock="true">
+                    <div class="w-8 h-8 bg-github-warning rounded-full flex items-center justify-center text-sm flex-shrink-0">
+                        MK
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium" data-bind="message.user">Mike Kim</span>
+                            <span class="text-xs text-github-text-secondary" data-bind="message.timestamp">2:38 PM</span>
+                        </div>
+                        <p class="text-sm text-github-text-secondary mt-1" data-bind="message.content">Should we add error handling for the socket connection?</p>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-github-border">
+                <div class="flex items-center space-x-2">
+                    <input 
+                        type="text" 
+                        placeholder="Type a message..." 
+                        class="flex-1 bg-github-bg border border-github-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-github-primary"
+                        data-implementation="Chat input with real-time messaging"
+                    >
+                    <button class="bg-github-primary hover:bg-blue-600 p-2 rounded transition-colors" data-event="click:sendMessage">
+                        <i class="fas fa-paper-plane text-sm"></i>
+                    </button>
+                </div>
+            </div>
+        </aside>
+        <!-- @END_COMPONENT: ChatPanel -->
+    </div>
+
+    <!-- @COMPONENT: Modal [new file creation] -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden" id="newFileModal">
+        <div class="bg-github-surface border border-github-border rounded-lg p-6 w-96">
+            <h3 class="text-lg font-semibold mb-4">Create New File</h3>
+            <form data-implementation="New file creation form">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">File Name</label>
+                    <input 
+                        type="text" 
+                        placeholder="example.js" 
+                        class="w-full bg-github-bg border border-github-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-github-primary"
+                        data-bind="newFileName"
+                    >
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">File Type</label>
+                    <select class="w-full bg-github-bg border border-github-border rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-github-primary">
+                        <option>JavaScript (.js)</option>
+                        <option>TypeScript (.ts)</option>
+                        <option>CSS (.css)</option>
+                        <option>HTML (.html)</option>
+                        <option>JSON (.json)</option>
+                        <option>Markdown (.md)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-github-text-secondary hover:text-github-text transition-colors" data-event="click:closeModal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-github-primary hover:bg-blue-600 text-sm font-medium rounded transition-colors" data-event="submit:createFile">
+                        Create File
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Modal -->
+
+    <!-- @COMPONENT: Toast [notifications] -->
+    <div class="fixed top-4 right-4 z-50 space-y-2" id="toastContainer">
+        <div class="bg-github-success border border-green-600 rounded-lg p-4 shadow-lg flex items-center space-x-3 min-w-80 transform transition-transform duration-300" data-mock="true">
+            <i class="fas fa-check-circle text-white"></i>
+            <div class="flex-1">
+                <p class="text-sm font-medium text-white">File saved successfully</p>
+                <p class="text-xs text-green-100">utils.js has been saved to the room</p>
+            </div>
+            <button class="text-white hover:text-green-100" data-event="click:dismissToast">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: Toast -->
+
+    <script>
+        // TODO: Implement real-time collaboration, file management, and chat functionality
+        // TODO: Add syntax highlighting using libraries like Prism.js or CodeMirror
+        // TODO: Implement auto-suggestions and code completion
+        // TODO: Add proper state management for React components
+        
+        (function() {
+            // Mock functionality for demonstration purposes
+            
+            // File management
+            const fileManager = {
+                openFile: function(fileId) {
+                    console.log('Opening file:', fileId);
+                },
+                createFile: function(fileName, fileType) {
+                    console.log('Creating file:', fileName, fileType);
+                },
+                saveFile: function(fileId) {
+                    console.log('Saving file:', fileId);
+                },
+                deleteFile: function(fileId) {
+                    console.log('Deleting file:', fileId);
+                }
+            };
+            
+            // Chat functionality
+            const chatManager = {
+                sendMessage: function(message) {
+                    console.log('Sending message:', message);
+                },
+                toggleChat: function() {
+                    const chatPanel = document.getElementById('chatPanel');
+                    chatPanel.classList.toggle('hidden');
+                }
+            };
+            
+            // Room management
+            const roomManager = {
+                copyRoomId: function() {
+                    navigator.clipboard.writeText('abc-123-xyz');
+                    console.log('Room ID copied to clipboard');
+                },
+                inviteUsers: function() {
+                    console.log('Opening invite dialog');
+                },
+                leaveRoom: function() {
+                    console.log('Leaving room');
+                }
+            };
+            
+            // Modal management
+            const modalManager = {
+                showModal: function(modalId) {
+                    document.getElementById(modalId).classList.remove('hidden');
+                },
+                hideModal: function(modalId) {
+                    document.getElementById(modalId).classList.add('hidden');
+                }
+            };
+            
+            // Toast notifications
+            const toastManager = {
+                showToast: function(type, title, message) {
+                    console.log('Showing toast:', type, title, message);
+                },
+                dismissToast: function(toastElement) {
+                    toastElement.remove();
+                }
+            };
+            
+            // Event delegation for demo purposes
+            document.addEventListener('click', function(e) {
+                const target = e.target.closest('[data-event]');
+                if (!target) return;
+                
+                const [event, handler] = target.dataset.event.split(':');
+                console.log('Mock event:', event, handler);
+                
+                // Prevent default for demo
+                e.preventDefault();
+            });
+        })();
+    </script>
+</body>
+</html>

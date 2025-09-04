@@ -6,7 +6,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
+import {useNavigate} from 'react-router-dom';
 
+
+const navigate = useNavigate();
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
   const [mode, setMode] = useState(initialMode);
   const [formData, setFormData] = useState({
@@ -55,6 +58,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           title: "Success!",
           description: "Account created successfully",
         });
+        navigate('/dashboard');
       } else {
         const { user } = await authService.login({
           email: formData.email,
@@ -66,6 +70,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
           title: "Welcome back!",
           description: "Logged in successfully",
         });
+        navigate('/dashboard');
       }
       
       onClose();
