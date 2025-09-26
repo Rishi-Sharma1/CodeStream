@@ -4,6 +4,8 @@ import { setupVite, serveStatic, log } from "./vite.js";
 import { connectDB } from "./db.js";
 
 const app = express();
+// Ensure cookies and sessions behave behind proxies (e.g., Replit/Cloud)
+app.set('trust proxy', 1);
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

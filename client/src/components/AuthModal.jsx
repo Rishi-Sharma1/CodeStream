@@ -6,11 +6,9 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
-import {useNavigate} from 'react-router-dom';
-
-
-const navigate = useNavigate();
+import { useLocation } from 'wouter';
 export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
+  const [, navigate] = useLocation();
   const [mode, setMode] = useState(initialMode);
   const [formData, setFormData] = useState({
     username: '',
@@ -56,7 +54,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'login' }) {
         setUser(user);
         toast({
           title: "Success!",
-          description: "Account created successfully",
+          description: "User registered successfully",
         });
         navigate('/dashboard');
       } else {

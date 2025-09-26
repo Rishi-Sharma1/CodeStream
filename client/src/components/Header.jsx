@@ -1,5 +1,5 @@
 import { Copy, UserPlus, LogOut, User, Settings } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useEditor } from '../context/EditorContext';
 import { useAuth } from '../context/AuthContext';
 import { authService } from '../services/authService';
@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 export default function Header() {
+  const [, navigate] = useLocation();
   const { currentRoom, users, connectionStatus } = useEditor();
   const { user, clearUser } = useAuth();
   const { toast } = useToast();
@@ -52,7 +53,7 @@ export default function Header() {
   };
 
   const leaveRoom = () => {
-    window.location.href = '/';
+    navigate('/');
   };
 
   return (
@@ -128,7 +129,7 @@ export default function Header() {
                 Invite
               </Button>
               <Button
-                onClick={() => window.history.pushState(null, '', '/')}
+                onClick={() => navigate('/')}
                 variant="outline"
                 size="sm"
                 className="bg-github-surface hover:bg-gray-700 border-github-border text-github-text"

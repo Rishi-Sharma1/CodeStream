@@ -20,7 +20,7 @@ const sessionMiddleware = session({
   }),
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
+  cookie: { secure: false, httpOnly: true, sameSite: 'lax', maxAge: 24 * 60 * 60 * 1000 }
 });
 
 const requireAuth = (req, res, next) =>
@@ -44,7 +44,9 @@ export async function registerRoutes(app) {
       const user = await storage.createUser(userData);
       req.session.userId = user.id;
       req.session.user = { id: user.id, username: user.username, email: user.email };
-      res.json({ user: req.session.user });
+      req.session.save(() => {
+        res.json({ user: req.session.user });
+      });
       // Redirect handled in client, not here
     } catch (error) {
       res.status(400).json({ message: error.message || "Invalid user data" });
@@ -66,7 +68,9 @@ export async function registerRoutes(app) {
       console.log("Hello Line 5");
       req.session.user = { id: user.id, username: user.username, email: user.email };
       console.log("Hello Line 6");
-      res.json({ user: req.session.user });
+      req.session.save(() => {
+        res.json({ user: req.session.user });
+      });
       console.log("Hello Line 7");
     } catch (error) {
       res.status(400).json({ message: error.message || "Invalid login data" });

@@ -2,7 +2,7 @@ import { apiRequest } from '../lib/queryClient';
 
 export const fileService = {
   async getFiles(roomId) {
-    const response = await apiRequest('GET', `/api/rooms/${roomId}/files`);
+    const response = await apiRequest('GET', `/api/files/room/${roomId}`);
     return response.json();
   },
 
